@@ -50,9 +50,8 @@ app.post('/send-message', async (req, res) => {
   }
 });
 
-// スケジュール実行（毎日午前0時）
-const scheduleTime = process.env.SCHEDULE_TIME || '0 0 * * *';
-cron.schedule(scheduleTime, async () => {
+// スケジュール実行用エンドポイント（Vercel Cron Jobs用）
+app.get('/api/cron', async (req, res) => {
   console.log('スケジュール実行開始:', new Date().toISOString());
   
   try {
@@ -62,18 +61,34 @@ cron.schedule(scheduleTime, async () => {
     if (message) {
       await sendMessageToChatwork(message, today);
       console.log('メッセージを送信しました:', message);
+      res.json({
+        success: true,
+        message: 'メッセージを送信しました',
+        sentMessage: message,
+        timestamp: today.toISOString()
+      });
     } else {
       console.log('今日の日付に対応するメッセージが見つかりませんでした');
+      res.json({
+        success: false,
+        message: '今日の日付に対応するメッセージが見つかりませんでした'
+      });
     }
   } catch (error) {
     console.error('スケジュール実行エラー:', error);
+    res.status(500).json({
+      success: false,
+      message: 'スケジュール実行中にエラーが発生しました',
+      error: error.message
+    });
   }
 });
 
-// サーバー起動
-app.listen(PORT, () => {
-  console.log(`サーバーが起動しました: http://localhost:${PORT}`);
-  console.log(`スケジュール設定: ${scheduleTime}`);
-});
+// ローカル開発時のみサーバーを起動
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`サーバーが起動しました: http://localhost:${PORT}`);
+  });
+}
 
 module.exports = app; 
