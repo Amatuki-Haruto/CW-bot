@@ -21,30 +21,27 @@ export default async function handler(req, res) {
     });
   }
 
-  try {
-    const today = new Date();
-    const message = await getMessageForDate(today);
-    
-    if (message) {
-      await sendMessageToChatwork(message, today);
-      return res.json({
-        success: true,
-        message: 'メッセージを送信しました',
-        sentMessage: message,
-        timestamp: today.toISOString()
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: '今日の日付に対応するメッセージが見つかりませんでした'
-      });
-    }
-  } catch (error) {
-    console.error('メッセージ送信エラー:', error);
+  // 環境変数の確認
+  const requiredEnvVars = [
+    'GOOGLE_SHEETS_SPREADSHEET_ID',
+    'GOOGLE_SHEETS_CREDENTIALS',
+    'CHATWORK_API_TOKEN',
+    'CHATWORK_ROOM_ID'
+  ];
+
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+  if (missingVars.length > 0) {
     return res.status(500).json({
       success: false,
-      message: 'メッセージ送信中にエラーが発生しました',
-      error: error.message
+      message: '環境変数が設定されていません',
+      missingVariables: missingVars
     });
   }
+
+  return res.json({
+    success: true,
+    message: '環境変数は正常に設定されています',
+    timestamp: new Date().toISOString()
+  });
 } 

@@ -18,7 +18,8 @@ export default async function handler(req, res) {
     return res.json({
       status: 'OK',
       message: 'Chatwork日付変更botが稼働中です',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development'
     });
   }
 
@@ -55,6 +56,6 @@ export default async function handler(req, res) {
   // その他のリクエスト
   return res.status(405).json({
     success: false,
-    message: 'エンドポイントが見つかりません'
+    message: 'Method not allowed'
   });
 } 
