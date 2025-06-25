@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   // ヘルスチェックエンドポイント
-  if (req.method === 'GET' && req.url === '/') {
+  if (req.method === 'GET') {
     return res.json({
       status: 'OK',
       message: 'Chatwork日付変更botが稼働中です',
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   }
 
   // 手動実行エンドポイント
-  if (req.method === 'POST' && req.url === '/send-message') {
+  if (req.method === 'POST') {
     try {
       const today = new Date();
       const message = await getMessageForDate(today);
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
   }
 
   // その他のリクエスト
-  return res.status(404).json({
+  return res.status(405).json({
     success: false,
     message: 'エンドポイントが見つかりません'
   });
